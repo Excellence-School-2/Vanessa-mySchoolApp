@@ -1,18 +1,26 @@
 package it.nttdata.myschoolspring.controller;
 
+import java.lang.ProcessBuilder.Redirect;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 
+import it.nttdata.myschoolspring.entity.Student;
+import it.nttdata.myschoolspring.repository.SchoolClassRepo;
 import it.nttdata.myschoolspring.repository.StudentRepository;
 
 @Controller
 public class StudentController {
     
+    private SchoolClassRepo schoolClassRepo;
+
     private StudentRepository studentRepository;
-    public StudentController (StudentRepository studentRepository) {
+    public StudentController (StudentRepository studentRepository,SchoolClassRepo schoolClassRepo ) {
         this.studentRepository=studentRepository;
+        this.schoolClassRepo=schoolClassRepo;
     }
 
     @GetMapping("/students")
@@ -32,4 +40,25 @@ public class StudentController {
         model.addAttribute("students",studentRepository.findStudentByClass(section) );
         return "studentslist";
     }
+
+    @PostMapping("/addStudent")
+    public String postNewStudent(Student student) {
+
+        //Salvo gli studenti che inserisco tramite form perchè lo passo al metodo
+        studentRepository.save(student);
+
+        //Gestisco dati provenienti dal form in html--> mi riporta alla lista
+        return "redirect:/students" ;
+
+    }
+
+    //Lo devo fare dopo il PostMapping per farci tornare il form --> devo mappare la richiesta get
+    @GetMapping("/addStudent")
+    public String getNewStudentForm(Model model) {
+        model.addAttribute("sclasses", schoolClassRepo.findAll());
+        return "addStudent";
+
+    }
+
+
 }
